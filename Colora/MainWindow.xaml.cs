@@ -6,11 +6,17 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Input;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using System.Windows.Interop;
 using Bluegrams.Application.WPF;
 using Colora.Palettes;
 using System.Windows.Navigation;
 using System.Windows.Media.Imaging;
+using Binding = System.Windows.Data.Binding;
+using Clipboard = System.Windows.Clipboard;
+using Control = System.Windows.Controls.Control;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using TextBox = System.Windows.Controls.TextBox;
 
 namespace Colora
 {
@@ -23,16 +29,17 @@ namespace Colora
 
         public NotifyColor CurrentColor { get; set; }
         private bool isMinimal;
+        private HotKey _hotKeyCaptureColor;
+        private HotKey _hotKeyCaptureColorTimeLapse;
+        private int _colorPickerNoColors = 16;
+        private int _colorPickerInterval = 100;
+
         public bool IsMinimal
         {
             get { return isMinimal; }
             set { if (isMinimal != value) { isMinimal = value; isMinimalToggle(); } }
         }
 
-        [DllImport("User32.dll")]
-        public static extern bool RegisterHotKey(IntPtr hWnd, int id, int fsModifiers, int vk);
-        [DllImport("User32.dll")]
-        public static extern bool UnregisterHotKey(IntPtr hWnd, int id);
 
         public MainWindow()
         {
@@ -57,12 +64,11 @@ namespace Colora
             lstboxLast.ItemsSource = lastColors;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private void WindowLoaded(object sender, RoutedEventArgs e)
         {
-            IntPtr handle = new WindowInteropHelper(this).Handle;
-            HwndSource src = HwndSource.FromHwnd(handle);
-            src.AddHook(new HwndSourceHook(WndProc));
-            MainWindow.RegisterHotKey(handle, this.GetHashCode(), 0x0003, (int)'C');
+            // Attach hotkeys
+            _hotKeyCaptureColor          = new HotKey(Key.C, KeyModifier.Ctrl | KeyModifier.Alt, OnHotKeyCaptureColorHandler);
+            _hotKeyCaptureColorTimeLapse = new HotKey(Key.T, KeyModifier.Ctrl | KeyModifier.Alt, OnHotKeyCaptureColorTimelapseHandler);
             // Check for updates
 #if PORTABLE
             manager.CheckForUpdates("https://colora.sourceforge.io/update_portable.xml");
@@ -71,18 +77,36 @@ namespace Colora
 #endif
         }
 
-        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        private void OnHotKeyCaptureColorTimelapseHandler(HotKey obj)
         {
-            // WM_HOTKEY = 0x0312
-            if (msg == 0x0312)
+            var count = 0;
+            var timer = new Timer {Interval = _colorPickerInterval};
+            // Capture just a single pixel to speed up
+            msc.StartSinglePixelCapturing();
+            timer.Tick += ((s, e) =>
             {
-                if ((bool)butPick.IsChecked)
-                    lastColors.Insert(0, CurrentColor.WpfColor);
-                else
-                    butPick.IsChecked = true;
-            }
-            return IntPtr.Zero;
+                lastColors.Insert(0, CurrentColor.WpfColor);
+                if (count++ == _colorPickerNoColors)
+                {
+                    timer.Stop();
+                    // Go back to normal capturing
+                    msc.StartCapturing();
+                }
+            });
+            timer.Start();
+
         }
+
+        private void OnHotKeyCaptureColorHandler(HotKey hotKey)
+        {
+
+            if ((bool)butPick.IsChecked)
+                lastColors.Insert(0, CurrentColor.WpfColor);
+            else
+                butPick.IsChecked = true;
+        }
+
+
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
         {
@@ -325,8 +349,20 @@ namespace Colora
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            _hotKeyCaptureColor.Unregister();
+            _hotKeyCaptureColorTimeLapse.Unregister();
             Properties.Settings.Default.LatestColors = lastColors;
             Properties.Settings.Default.Save();
+        }
+
+        private void MenuItemColorPickerSettings_Click(object sender, RoutedEventArgs e)
+        {
+            var inputDialog = new ColorPickerSettings(_colorPickerInterval,_colorPickerNoColors);
+            if (inputDialog.ShowDialog() == true)
+            {
+                _colorPickerInterval = inputDialog.Interval;
+                _colorPickerNoColors = inputDialog.Colors;
+            }
         }
     }
 }

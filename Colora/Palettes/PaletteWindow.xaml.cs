@@ -14,7 +14,9 @@ namespace Colora.Palettes
 
         public static RoutedCommand EditColor => editColor;
         public static RoutedUICommand editColor = new RoutedUICommand();
-        
+
+        public static RoutedCommand SaveAsFastLed => saveAsFastLedPalette;
+        public static RoutedUICommand saveAsFastLedPalette = new RoutedUICommand();
 
         public PaletteWindow(Window owner) : this(owner, new Palette()) {}
 
@@ -99,6 +101,20 @@ namespace Colora.Palettes
             {
                 palette.Colors[lstPalette.SelectedIndex] = colEdit.NewColor;
             }
+        }
+
+        private void MenuItem_Click_FastLed(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(txtName.Text))
+                palette.Name = txtName.Text;
+            isSaved = PaletteFile.SavePaletteFastLed(palette);
+        }
+
+        private void MenuItem_Click_FastLedWithGamma(object sender, RoutedEventArgs e)
+        {
+            if (!String.IsNullOrWhiteSpace(txtName.Text))
+                palette.Name = txtName.Text;
+            isSaved = PaletteFile.SavePaletteFastLedWithGamma(palette);
         }
 
         private void lstPalette_MouseDoubleClick(object sender, MouseButtonEventArgs e) => EditColor_Executed(sender, null);

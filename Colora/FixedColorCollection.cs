@@ -12,7 +12,7 @@ namespace Colora
 
         public FixedColorCollection() : base()
         {
-            MaxLength = 10;
+            MaxLength = 255;
         }
 
         public new void Add(Color item)

@@ -15,6 +15,10 @@ namespace Colora
     class MouseScreenCapture
     {
         private DispatcherTimer timer;
+        private int _currentCaptureSize;
+        private Bitmap _map;
+        private Bitmap _screen;
+        private int _prevWidth;
 
         public event EventHandler CaptureTick;
         /// <summary>
@@ -48,10 +52,18 @@ namespace Colora
             timer.Interval = new TimeSpan(0, 0, 0, 0, 50);
             timer.Tick += new EventHandler(timer_Tick);
             RealCaptureSize = 33;
+            _map = new Bitmap(100, 100);
         }
 
         public void StartCapturing()
         {
+            _currentCaptureSize = RealCaptureSize;
+            timer.Start();
+        }
+
+        public void StartSinglePixelCapturing()
+        {
+            _currentCaptureSize = 1;
             timer.Start();
         }
 
@@ -60,26 +72,38 @@ namespace Colora
             timer.Stop();
         }
 
+        private Bitmap GetScreen(int width)
+        {
+            
+            if (width != _prevWidth || _screen == null)
+            {
+                _screen = new Bitmap(width, width);
+                _prevWidth = width;
+            }
+            return _screen;
+        }
+
         private void timer_Tick(object sender, EventArgs e)
         {
-            int sz = RealCaptureSize;
-            int shalf = (int)Math.Floor(RealCaptureSize / (double)2);
-            Bitmap screen = new Bitmap(sz, sz);
+            int sz = _currentCaptureSize;
+            int shalf = (int)Math.Floor(_currentCaptureSize / (double)2);
+            Bitmap screen = GetScreen(sz);
             using (Graphics g = Graphics.FromImage(screen))
             {
                 g.CopyFromScreen(Control.MousePosition.X - shalf, Control.MousePosition.Y - shalf, 0, 0, new System.Drawing.Size(sz, sz));
             }
-            Bitmap map = new Bitmap(100, 100);
-            using (Graphics g = Graphics.FromImage(map))
+
+            using (Graphics g = Graphics.FromImage(_map))
             {
                 g.PixelOffsetMode = PixelOffsetMode.Half;
                 g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
                 g.DrawImage(screen, new Rectangle(0, 0, 100, 100), new Rectangle(0, 0, sz, sz), GraphicsUnit.Pixel);
             }
-            CaptureBitmap = map;
+            CaptureBitmap = _map;
+            //CaptureBitmap = (Bitmap)_map.Clone();
             System.Drawing.Color drawing_Col = screen.GetPixel(sz / 2, sz / 2);
             PointerPixelColor = Color.FromRgb(drawing_Col.R, drawing_Col.G, drawing_Col.B);
-            screen.Dispose();
+            //screen.Dispose();
             if (CaptureTick != null)
                 CaptureTick(this, new EventArgs());
         }

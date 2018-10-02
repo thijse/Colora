@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:Colora"
         x:Name="mainWindow"
         Title="Colora" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" FontSize="11.5" KeyDown="Window_KeyDown" 
-        Loaded="Window_Loaded" Closing="Window_Closing" Icon="img/colora.png" SnapsToDevicePixels="True">
+        Loaded="WindowLoaded" Closing="Window_Closing" Icon="img/colora.png" SnapsToDevicePixels="True">
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Control.Padding" Value="8,0"/>
@@ -30,8 +30,9 @@
             <MenuItem Header="{x:Static p:Resources.MainWindow_menOptions}">
                 <MenuItem Header="{x:Static p:Resources.MainWindow_menColorDialog}" Command="local:CustomCommands.ColorDialog" 
                           InputGestureText="{Binding Source={x:Static p:Resources.Global_keyCtrl}, StringFormat={}{0}+D}"/>
+                <MenuItem Header="{x:Static p:Resources.MainWindow_menPickScreenSettings}" InputGestureText="{Binding Source={x:Static p:Resources.Global_keyCtrl}, StringFormat={}{0}+Alt+S}" Margin="0,0,0.4,0" Click="MenuItemColorPickerSettings_Click"/>
                 <MenuItem Header="{x:Static p:Resources.MainWindow_menPickScreen}" Click="MenuPickScreen_Click" 
-                          InputGestureText="{Binding Source={x:Static p:Resources.Global_keyCtrl}, StringFormat={}{0}+Alt+C}"/>
+                          InputGestureText="{Binding Source={x:Static p:Resources.Global_keyCtrl}, StringFormat={}{0}+Alt+C}" Margin="0,0,0.4,0"/>
                 <Separator/>
                 <MenuItem x:Name="menNewPalette" Header="{x:Static p:Resources.MainWindow_menNewPalette}" Command="New" />
                 <MenuItem x:Name="menDeleteLatest" Header="{x:Static p:Resources.MainWindow_menDeleteLatest}" Click="menDeleteLatest_Click"/>

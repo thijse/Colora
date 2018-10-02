@@ -241,6 +241,15 @@ namespace Colora.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Color Picker settings.
+        /// </summary>
+        public static string MainWindow_menPickScreenSettings {
+            get {
+                return ResourceManager.GetString("MainWindow_menPickScreenSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pin on _Top.
         /// </summary>
         public static string MainWindow_menTopmost {
@@ -304,6 +313,15 @@ namespace Colora.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export....
+        /// </summary>
+        public static string PaletteWindow_menExport {
+            get {
+                return ResourceManager.GetString("PaletteWindow_menExport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to _File.
         /// </summary>
         public static string PaletteWindow_menFile {
@@ -327,6 +345,24 @@ namespace Colora.Properties {
         public static string PaletteWindow_menSave {
             get {
                 return ResourceManager.GetString("PaletteWindow_menSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export Palette for FastLed.
+        /// </summary>
+        public static string PaletteWindow_menSaveFastLedPalette {
+            get {
+                return ResourceManager.GetString("PaletteWindow_menSaveFastLedPalette", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export Palette for FastLed - Gamma corrected.
+        /// </summary>
+        public static string PaletteWindow_menSaveFastLedPaletteGamma {
+            get {
+                return ResourceManager.GetString("PaletteWindow_menSaveFastLedPaletteGamma", resourceCulture);
             }
         }
         

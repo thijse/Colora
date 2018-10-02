@@ -20,6 +20,10 @@
                 <MenuItem Header="{x:Static p:Resources.PaletteWindow_menOpen}" Command="Open"/>
                 <Separator/>
                 <MenuItem Header="{x:Static p:Resources.PaletteWindow_menSave}" Command="Save"/>
+                <MenuItem Header="{x:Static p:Resources.PaletteWindow_menExport}">
+                    <MenuItem Header="{x:Static p:Resources.PaletteWindow_menSaveFastLedPalette}" Click="MenuItem_Click_FastLed" />
+                    <MenuItem Header="{x:Static p:Resources.PaletteWindow_menSaveFastLedPaletteGamma}" Click="MenuItem_Click_FastLedWithGamma"  />
+                </MenuItem>
             </MenuItem>
         </Menu>
         <StackPanel>

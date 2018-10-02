@@ -12,6 +12,56 @@ namespace Colora.Palettes
     static class PaletteFile
     {
 
+
+        internal static bool SavePaletteFastLed(Palette palette)
+        {
+            System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+            sfd.DefaultExt = ".h";
+            sfd.Filter = "Fastled Palette |*.h";
+            sfd.FileName = palette.Name;
+            sfd.Title = "Save FastLed Color Palette";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    SaveFastLedPalette(sfd.FileName, palette);
+                    sfd.Dispose();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(String.Format("{0} {1}", Properties.Resources.PaletteWindow_strErrorSave, ex.Message), "", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            sfd.Dispose();
+            return false;
+        }
+
+        internal static bool SavePaletteFastLedWithGamma(Palette palette)
+        {
+            System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
+            sfd.DefaultExt = ".h";
+            sfd.Filter = "Fastled Palette |*.h";
+            sfd.FileName = palette.Name;
+            sfd.Title = "Save FastLed Color Palette with Gamma correction";
+            if (sfd.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                try
+                {
+                    SaveFastLedPaletteWithGamma(sfd.FileName, palette);
+                    sfd.Dispose();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(String.Format("{0} {1}", Properties.Resources.PaletteWindow_strErrorSave, ex.Message), "", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            sfd.Dispose();
+            return false;
+        }
+
+
         internal static bool SavePalette(Palette palette)
         {
             System.Windows.Forms.SaveFileDialog sfd = new System.Windows.Forms.SaveFileDialog();
@@ -52,6 +102,72 @@ namespace Colora.Palettes
             {
                 xmlSerializer.Serialize(fs, palette, Ns);
             }
+        }
+
+        private static void SaveFastLedPalette(string fileName, Palette palette)
+        {
+            if (string.IsNullOrWhiteSpace(palette.Name)) palette.Name = Path.GetFileNameWithoutExtension(fileName);
+            using (StreamWriter sw = new StreamWriter(fileName))
+            {
+                sw.WriteLine("// Gradient Palette");
+                sw.WriteLine("// Name: " + palette.Name);
+                sw.WriteLine("// converted for FastLED without gammas ");
+
+                sw.WriteLine("");
+                sw.WriteLine("DEFINE_GRADIENT_PALETTE( "+ palette.Name + " ){)");
+                for (var i = 0; i < palette.Colors.Count; i++)
+                {
+                    PColor palcol = palette.Colors[i];
+                    int index = (int)(255.0*((float) i / (float) (palette.Colors.Count-1.0)));
+                    Color col = (Color) ColorConverter.ConvertFromString(palcol.Hex);
+                    var line = String.Format("  {0,3}, {1,3}, {2,3}, {3,3},", index, col.R, col.G, col.B);
+                    if (!string.IsNullOrWhiteSpace(palcol.Name)) line += " //" + palcol.Name;
+                    sw.WriteLine(line);
+                    //sw.WriteLine(String.Format("{0,3}, {1,3}, {2,3}, {3,3}," // {4}", index, col.R, col.G, col.B, palcol.Name));
+                }
+                sw.WriteLine("}");
+            }
+        }
+
+        private static void SaveFastLedPaletteWithGamma(string fileName, Palette palette)
+        {
+            if (string.IsNullOrWhiteSpace(palette.Name)) palette.Name = Path.GetFileNameWithoutExtension(fileName);
+            using (StreamWriter sw = new StreamWriter(fileName))
+            {
+                var rgamma = 2.6;
+                var ggamma = 2.2;
+                var bgamma = 2.5;
+
+                sw.WriteLine("// Gradient Palette");
+                sw.WriteLine("// Name: " + palette.Name);
+                sw.WriteLine($"// converted for FastLED with gammas ({rgamma}, {ggamma}, {bgamma})");
+
+                sw.WriteLine("");
+                sw.WriteLine("DEFINE_GRADIENT_PALETTE( " + palette.Name + " ){");
+                for (var i = 0; i < palette.Colors.Count; i++)
+                {
+                    PColor palcol = palette.Colors[i];
+                    int index = (int)(255.0 * ((float)i / (float)(palette.Colors.Count - 1.0)));
+                    Color col = (Color)ColorConverter.ConvertFromString(palcol.Hex);
+                    var line = String.Format("  {0,3}, {1,3}, {2,3}, {3,3},", index, ConvertGamma(col.R, rgamma), ConvertGamma(col.G, ggamma), ConvertGamma(col.B, bgamma));
+                    if (!string.IsNullOrWhiteSpace(palcol.Name)) line += " //" + palcol.Name;
+                    sw.WriteLine(line);
+                    //sw.WriteLine(String.Format("{0,3} {1,3} {2,3} {3,3} // {4}", index, ConvertGamma(col.R,rgamma), ConvertGamma(col.G,ggamma), ConvertGamma(col.B,bgamma), palcol.Name));
+                }
+                sw.WriteLine("}");
+            }
+        }
+
+        private static byte ConvertGamma(byte orig, double gamma)
+        {
+            double o = (double)orig / 255.0;
+            double adj = Math.Pow(o, gamma);
+            byte res = (byte)(Math.Floor(adj * 255.0));
+            if ((orig != 0) && (res == 0))
+            {
+                res = 1;
+            }
+            return res;
         }
 
         private static void saveGimpPalette(string fileName, Palette palette)

@@ -228,4 +228,16 @@ Error code:</value>
   <data name="Global_keyCtrl" xml:space="preserve">
     <value>Ctrl</value>
   </data>
+  <data name="MainWindow_menPickScreenSettings" xml:space="preserve">
+    <value>Color Picker settings</value>
+  </data>
+  <data name="PaletteWindow_menExport" xml:space="preserve">
+    <value>Export...</value>
+  </data>
+  <data name="PaletteWindow_menSaveFastLedPalette" xml:space="preserve">
+    <value>Export Palette for FastLed</value>
+  </data>
+  <data name="PaletteWindow_menSaveFastLedPaletteGamma" xml:space="preserve">
+    <value>Export Palette for FastLed - Gamma corrected</value>
+  </data>
 </root>
